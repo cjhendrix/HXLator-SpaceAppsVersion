@@ -1,16 +1,89 @@
-import os
+import os, logging, datetime, urllib, urllib2, re
 from flask import send_from_directory
 from flask import Flask, request, redirect, url_for
 from flask import render_template
+from flask import json
 from werkzeug import secure_filename
 #from openpyxl.reader.excel import load_workbook
 import xlrd
+
+#===========my addition===============
+hxlcontent = ''
+uricontainer = ''
+#=====================================
+
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['xls','xlsx'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+#===========my addition===============
+# this function is to 0 to numbers smaller then 10 to match the RDF standard
+def pad(n):
+  if int(n) > 9:
+    result = str(n)
+  else:
+    result = '0' + str(n)
+  return result
+
+# this function is to form standard ISO Date String used in RDF
+def ISODateString(d):
+  output = pad(d.year) + '-' + pad(int(d.month) + 1) + '-' + pad(d.day) + 'T'+ pad(d.hour) + ':'+ pad(d.minute) + ':' + pad(d.second) + 'Z'
+  return output
+
+# this function is to create the same result as javascript's Date.getTime() used for the container ID
+def getTime(d):
+  currenttime = d
+  basetime = datetime.datetime(1970,1,1,0,0,0,0)
+  dt = currenttime - basetime
+  milisecs = ((dt.days * 24 * 60 * 60) + dt.seconds) * 1000 + (dt.microseconds / 1000)
+  result = str(milisecs)
+  return result
+
+# this function generates new URI for hxl class
+def generateURI(inputclass):
+  classuri = [word for word in inputclass.split('#')]
+  if len(classuri) == 2:
+    shortclass = classuri[1]
+  else:
+    shortclass = inputclass
+
+    currenttime = datetime.datetime.now()
+    stampme = getTime(currenttime)
+    URI = 'http://hxl.carsten.io/' + shortclass.lower() + '/' + str(stampme)
+    return URI
+
+# this function makes new URI for hxl resource type
+def makeURI(name,res_type):
+  if name.find('http://') != 0:
+    fragment = re.sub(r'\s','_',name)
+    name = 'http://hxl.carsten.io/'+ res_type.lower() + '/' + fragment.lower()
+  return name
+
+# this function checks the hxl for it's object position and adjusted the output
+def getTriple(subject,predicate,obj):
+  if obj.find('http://') == 0:
+    new_obj = '<' + obj + '>'
+  else:
+    new_obj = '"' + obj + '"'
+  triple = '<' + subject +'> <' + predicate + '> ' + new_obj + ' .\n'
+  return triple
+
+# this function checks for the N-triple. If existed removed it, if not existed add
+def swapTriple(subject, predicate, obj):
+  if subject != '' and predicate != '' and obj !='':
+    content = hxlcontent
+    triple = getTriple(subject,predicate,obj)
+    if content.find(triple) == -1:
+      content = content + triple
+    else:
+      content.replace(triple,'')
+  return content
+
+#=====================================
+
 
 def allowed_file(filename):
     return '.' in filename and \
