@@ -20,24 +20,11 @@ def allowed_file(filename):
 def upload_file():
     if request.method == 'POST':
         file = request.files['file']
-        app.logger.debug('post')
         if file and allowed_file(file.filename):
             filepath = save_file(file)
-#            filename = secure_filename(file.filename)
-#            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#            file.save(filepath)
             rows = read_rows(filepath)
             return render_template('table.html', rows=rows)
-
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
-    '''
+    return render_template('upload.html')
 
 def save_file(file):
     filename = secure_filename(file.filename)
