@@ -10,6 +10,11 @@ import xlrd
 #===========my addition===============
 hxlcontent = ''
 uricontainer = ''
+prefixes = 'PREFIX owl: <http://www.w3.org/2002/07/owl#> \nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \nPREFIX foaf: <http://xmlns.com/foaf/0.1/> \nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \nPREFIX skos:<http://www.w3.org/2004/02/skos/core#> \nPREFIX hxl: <http://hxl.humanitarianresponse.info/#> \n'''
+
+endpointURL = 'http://83.169.33.54:8080/parliament/sparql'
+queryUrl = 'http://jsonp.lodum.de/?endpoint=' + endpointURL
+
 #=====================================
 
 
@@ -81,7 +86,6 @@ def swapTriple(subject, predicate, obj):
     else:
       content.replace(triple,'')
   return content
-
 #=====================================
 
 
@@ -92,17 +96,32 @@ def allowed_file(filename):
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filepath = save_file(file)
+        inputfile = request.files['file']
+        logging.error('##############check here #############')
+        logging.error(inputfile)
+        app.logger.debug('post')
+        if inputfile and allowed_file(inputfile.filename):
+            filepath = save_file(inputfile)
+#            filename = secure_filename(file.filename)
+#            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#            file.save(filepath)
             rows = read_rows(filepath)
             return render_template('table.html', rows=rows)
-    return render_template('upload.html')
 
-def save_file(file):
-    filename = secure_filename(file.filename)
+    return '''
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form action="" method=post enctype=multipart/form-data>
+      <p><input type=file name=file>
+         <input type=submit value=Upload>
+    </form>
+    '''
+
+def save_file(inputfile):
+    filename = secure_filename(inputfile.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(filepath)
+    inputfile.save(filepath)
     return filepath
 
 def read_rows(filepath):
@@ -118,6 +137,5 @@ def read_rows(filepath):
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
-
 if __name__ == "__main__":
-    app.run()#host='0.0.0.0')
+    app.run(debug=True)#host='0.0.0.0')
