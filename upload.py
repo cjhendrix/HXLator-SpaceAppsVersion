@@ -102,9 +102,6 @@ def upload_file():
         app.logger.debug('post')
         if inputfile and allowed_file(inputfile.filename):
             filepath = save_file(inputfile)
-#            filename = secure_filename(file.filename)
-#            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#            file.save(filepath)
             rows = read_rows(filepath)
             return render_template('table.html', rows=rows)
 

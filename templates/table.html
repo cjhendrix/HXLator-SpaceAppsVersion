@@ -17,7 +17,7 @@
   <script type="text/javascript">
     $(document).ready(function(){
       $('td').click(function(event){
-         select_cell(event.target.id);
+        select_cell(event.target.id);
       }
        );
     });
@@ -32,8 +32,9 @@
         }else{
             var from, to, i, imin, imax, j, jmin, jmax;
             foreach_cell(selected_from, id, function(i,j){
-                 $("#"+i+"-"+j).addClass('grey');
+                $("#"+i+"-"+j).addClass('grey');
             });
+            alert('The greyed cell will now be imported into HXL');
             selected_from = 0;              
         }
     }
@@ -60,7 +61,7 @@
     {% for i in range(rows|count) %}
     <tr>
       {% for j in range(rows[i]|count) %}
-      <td id="{{i}}-{{j}}">{{ rows[i][j] }}</td>
+      <td id="{{i}}-{{j}}" data-key="{{i}}-{{j}}" data-value="{{ rows[i][j] }}">{{ rows[i][j] }}</td>
       {% endfor %}
     </tr>
     {% endfor %}
