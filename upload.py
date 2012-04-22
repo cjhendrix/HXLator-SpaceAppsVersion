@@ -134,5 +134,10 @@ def read_rows(filepath):
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+@app.route('/hxl_processor/',methods=['GET','POST'])
+def process_hxl():
+  #parse it here
+  return ''
+
 if __name__ == "__main__":
     app.run(debug=True)#host='0.0.0.0')
