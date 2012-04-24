@@ -1,0 +1,11 @@
+<div id="worksheet-view">
+  <table>
+    {% for i in range(rows|count) %}
+    <tr>
+      {% for j in range(rows[i]|count) %}
+      <td id="{{i}}-{{j}}" data-key="{{i}}-{{j}}" data-value="{{ rows[i][j] }}">{{ rows[i][j] }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+</div>
