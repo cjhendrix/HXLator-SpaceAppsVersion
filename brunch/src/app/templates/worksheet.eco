@@ -1,11 +1,13 @@
 <div id="worksheet-view">
   <table>
-    {% for i in range(rows|count) %}
+    <% if @rows: %>
+    <% for row in @rows: %>
     <tr>
-      {% for j in range(rows[i]|count) %}
-      <td id="{{i}}-{{j}}" data-key="{{i}}-{{j}}" data-value="{{ rows[i][j] }}">{{ rows[i][j] }}</td>
-      {% endfor %}
+      <% for cell,index in row: %>
+      <td id="<%= @rows.indexOf(row) + 1 %>-<%= index + 1 %>"  data-value="<%= cell %>"><%= cell %></td>
+      <% end %>
     </tr>
-    {% endfor %}
+    <% end %>
   </table>
 </div>
+

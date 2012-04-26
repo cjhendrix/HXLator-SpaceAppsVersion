@@ -18,33 +18,51 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-@app.route('/original', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        inputfile = request.files['file']
-        logging.error('##############check here #############')
-        logging.error(inputfile)
-        app.logger.debug('post')
-        if inputfile and allowed_file(inputfile.filename):
-            filepath = save_file(inputfile)
-            rows = read_rows(filepath)
-            return render_template('table.html', rows=rows)
+#@app.route('/original', methods=['GET', 'POST'])
+#def upload_file():
+#    if request.method == 'POST':
+#        inputfile = request.files['file']
+#        logging.error('##############check here #############')
+#        logging.error(inputfile)
+#        app.logger.debug('post')
+#        if inputfile and allowed_file(inputfile.filename):
+#            filepath = save_file(inputfile)
+#            rows = read_rows(filepath)
+#            return render_template('table.html', rows=rows)
+#
+#    return '''
+#    <!doctype html>
+#    <title>Upload new File</title>
+#  <h1>Upload new File</h1>
+#    <form action="" method=post enctype=multipart/form-data>
+#      <p><input type=file name=file>
+#         <input type=submit value=Upload>
+#    </form>
+#    '''
 
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
-    '''
+@app.route('/process_input/',methods=['POST','GET'])
+def process_input():
+  inputfile = request.files['file']
+  if inputfile and allowed_file(inputfile.filename):
+    filepath = save_file(inputfile)
+    return 'file uploaded'
 
 def save_file(inputfile):
     filename = secure_filename(inputfile.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     inputfile.save(filepath)
     return filepath
+
+@app.route('/fetch_rows/',methods=['GET','POST'])
+def fetch_rows():
+    filename = request.values.get('filename')
+    final_file = [i for i in filename.split('\\')]
+    idx = len(final_file)
+    thefile = final_file[idx-1]
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], thefile)
+    rows = read_rows(filepath)
+    payload = json.dumps(dict(rows=rows))
+    return payload
 
 def read_rows(filepath):
     rows = []
@@ -61,7 +79,7 @@ def uploaded_file(filename):
                                filename)
 
 @app.route('/')
-def test_run():
+def landing_page():
   return render_template('index.html')
 
 if __name__ == "__main__":

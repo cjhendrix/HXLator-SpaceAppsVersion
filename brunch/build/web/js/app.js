@@ -11177,7 +11177,7 @@ window.jQuery = window.$ = jQuery;
   }
   (function() {
     (function() {
-      __out.push('<div id="upload-view">\n  <h1>Upload File</h1>\n  <p>Please select the file to convert.</p>\n  <p>Remember that the files should have .xls or .xlsx extension.</p>\n  <form action="/process_input/" method="post" enctype="multipart/form-data" target="theframe">\n    <input type="file" name="file"><br/><br/>\n    <input type="image" src="/static/img/hxlate.png" value="Upload">\n  </form>\n  <iframe name="theframe" id="theframe" width="1px" height="1px"></iframe>\n</div>\n');
+      __out.push('<div id="upload-view">\n  <h1>Upload File</h1>\n  <p>Please select the file to convert.</p>\n  <p>Remember that the files should have .xls or .xlsx extension.</p>\n  <form id="upload-form" action="/process_input/" method="post" enctype="multipart/form-data" target="theframe">\n    <input type="file" name="file"><br/><br/>\n    <input type="image" id="uploadme" src="/static/img/hxlate.png" value="Upload">\n  </form>\n  <iframe name="theframe" id="theframe" width="1px" height="1px"></iframe>\n</div>\n<div id="upload-await">\n  <h1>Patience Please</h1>\n  <p>Please wait while we process your file</p>\n</div>\n');
     }).call(this);
     
   }).call(__obj);
@@ -11222,7 +11222,30 @@ window.jQuery = window.$ = jQuery;
   }
   (function() {
     (function() {
-      __out.push('<div id="worksheet-view">\n  <table>\n    {% for i in range(rows|count) %}\n    <tr>\n      {% for j in range(rows[i]|count) %}\n      <td id="{{i}}-{{j}}" data-key="{{i}}-{{j}}" data-value="{{ rows[i][j] }}">{{ rows[i][j] }}</td>\n      {% endfor %}\n    </tr>\n    {% endfor %}\n  </table>\n</div>\n');
+      var cell, index, row, _i, _len, _len2, _ref;
+      __out.push('<div id="worksheet-view">\n  <table>\n    ');
+      if (this.rows) {
+        __out.push('\n    ');
+        _ref = this.rows;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          row = _ref[_i];
+          __out.push('\n    <tr>\n      ');
+          for (index = 0, _len2 = row.length; index < _len2; index++) {
+            cell = row[index];
+            __out.push('\n      <td id="');
+            __out.push(__sanitize(this.rows.indexOf(row) + 1));
+            __out.push('-');
+            __out.push(__sanitize(index + 1));
+            __out.push('"  data-value="');
+            __out.push(__sanitize(cell));
+            __out.push('">');
+            __out.push(__sanitize(cell));
+            __out.push('</td>\n      ');
+          }
+          __out.push('\n    </tr>\n    ');
+        }
+        __out.push('\n  </table>\n</div>\n\n');
+      }
     }).call(this);
     
   }).call(__obj);
@@ -11255,7 +11278,7 @@ window.jQuery = window.$ = jQuery;
 }).call(this);
 }, "views/upload_view": function(exports, require, module) {(function() {
   var uploadTemplate;
-  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
     ctor.prototype = parent.prototype;
@@ -11267,20 +11290,37 @@ window.jQuery = window.$ = jQuery;
   exports.UploadView = (function() {
     __extends(UploadView, Backbone.View);
     function UploadView() {
+      this.do_upload = __bind(this.do_upload, this);
       UploadView.__super__.constructor.apply(this, arguments);
     }
     UploadView.prototype.id = 'upload-view';
     UploadView.prototype.el = '#page';
+    UploadView.prototype.events = {
+      'click #uploadme': 'do_upload'
+    };
     UploadView.prototype.render = function() {
       $(this.el).html(uploadTemplate());
       return this;
+    };
+    UploadView.prototype.do_upload = function(event) {
+      var fullpath;
+      event.preventDefault();
+      fullpath = $('[name=file]').val();
+      if (fullpath !== '') {
+        $('#upload-form').submit();
+        $('#upload-view').hide();
+        $('#upload-await').show();
+        return app.views.worksheet.render(fullpath);
+      } else {
+        return alert('please select a file');
+      }
     };
     return UploadView;
   })();
 }).call(this);
 }, "views/worksheet_view": function(exports, require, module) {(function() {
   var worksheetTemplate;
-  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
     ctor.prototype = parent.prototype;
@@ -11292,13 +11332,123 @@ window.jQuery = window.$ = jQuery;
   exports.WorksheetView = (function() {
     __extends(WorksheetView, Backbone.View);
     function WorksheetView() {
+      this.create_json = __bind(this.create_json, this);
+      this.selectCell = __bind(this.selectCell, this);
+      this.render = __bind(this.render, this);
       WorksheetView.__super__.constructor.apply(this, arguments);
     }
     WorksheetView.prototype.id = 'worksheet-view';
     WorksheetView.prototype.el = '#page';
-    WorksheetView.prototype.render = function() {
-      $(this.el).html(worksheetTemplate());
-      return this;
+    WorksheetView.prototype.selected_from = '';
+    WorksheetView.prototype.head_select = 0;
+    WorksheetView.prototype.head_json = [];
+    WorksheetView.prototype.head_from = '';
+    WorksheetView.prototype.head_to = '';
+    WorksheetView.prototype.data_json = [];
+    WorksheetView.prototype.data_from = '';
+    WorksheetView.prototype.data_to = '';
+    WorksheetView.prototype.selection_done = 0;
+    WorksheetView.prototype.events = {
+      'click td': 'selectCell'
+    };
+    WorksheetView.prototype.render = function(data) {
+      var ajaxCall;
+      this.filepath = data;
+      if (this.filepath) {
+        return (ajaxCall = __bind(function() {
+          return $.ajax({
+            url: '/fetch_rows/',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+              filename: this.filepath
+            },
+            success: __bind(function(data) {
+              $(this.el).html(worksheetTemplate(data));
+              return this;
+            }, this),
+            error: __bind(function() {
+              return setTimeout(ajaxCall, 5000);
+            }, this)
+          });
+        }, this))();
+      }
+    };
+    WorksheetView.prototype.selectCell = function(event) {
+      var from, i, id, imax, imin, j, jmax, jmin, result, to;
+      id = event.currentTarget.id;
+      if (this.selected_from === '') {
+        this.selected_from = id;
+        if (this.head_select === 0) {
+          $('td').removeClass('blue');
+          $('#' + id).addClass('blue');
+        } else {
+          $('td').removeClass('grey');
+          $('#' + id).addClass('grey');
+        }
+      } else {
+        from = this.selected_from.split('-');
+        to = id.split('-');
+        if (this.head_select === 0) {
+          this.head_from = from;
+          this.head_to = to;
+        } else {
+          this.data_from = from;
+          this.data_to = to;
+        }
+        imin = parseInt(from[0]);
+        imax = parseInt(to[0]) + 1;
+        jmin = parseInt(from[1]);
+        jmax = parseInt(to[1]) + 1;
+        i = imin;
+        while (i < imax) {
+          j = jmin;
+          while (j < jmax) {
+            if (this.head_select === 0) {
+              $('#' + i + '-' + j).addClass('blue');
+            } else {
+              $('#' + i + '-' + j).addClass('grey');
+            }
+            j++;
+          }
+          i++;
+        }
+        this.head_select++;
+        this.selected_from = '';
+      }
+      if (this.head_select === 2) {
+        result = confirm('have you selected the correct data');
+        if (result) {
+          return this.create_json();
+        } else {
+          return this.head_select = 1;
+        }
+      }
+    };
+    WorksheetView.prototype.create_json = function() {
+      var data, from, i, imax, imin, j, jmax, jmin, rows, to;
+      from = this.head_from;
+      to = this.head_to;
+      imin = parseInt(from[0]);
+      imax = parseInt(to[0]) + 1;
+      jmin = parseInt(from[1]);
+      jmax = parseInt(to[1]) + 1;
+      i = imin;
+      while (i < imax) {
+        rows = [];
+        j = jmin;
+        while (j < jmax) {
+          data = $('#' + i + '-' + j).data('value');
+          rows.push({
+            id: i + '-' + j,
+            value: data
+          });
+          j++;
+        }
+        this.head_json.push(rows);
+        i++;
+      }
+      return console.log(this.head_json);
     };
     return WorksheetView;
   })();
