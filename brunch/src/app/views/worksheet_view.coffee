@@ -68,8 +68,10 @@ class exports.WorksheetView extends Backbone.View
         i++
       @head_select++
       @selected_from = ''
+      if @head_select == 1
+        alert 'You have selected the headers. Now please select the data range'
     if @head_select == 2
-      result = confirm 'have you selected the correct data'
+      result = confirm 'have you selected the correct data?'
       if result
         @create_json()
       else

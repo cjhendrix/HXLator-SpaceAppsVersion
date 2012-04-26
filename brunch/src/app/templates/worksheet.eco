@@ -1,4 +1,6 @@
 <div id="worksheet-view">
+  Please select the headers and data in this worksheet. Highlight all headers first (blue color) and
+then please highlight the data (grey color)
   <table>
     <% if @rows: %>
     <% for row in @rows: %>

@@ -11223,7 +11223,7 @@ window.jQuery = window.$ = jQuery;
   (function() {
     (function() {
       var cell, index, row, _i, _len, _len2, _ref;
-      __out.push('<div id="worksheet-view">\n  <table>\n    ');
+      __out.push('<div id="worksheet-view">\n  Please select the headers and data in this worksheet. Highlight all headers first (blue color) and\nthen please highlight the data (grey color)\n  <table>\n    ');
       if (this.rows) {
         __out.push('\n    ');
         _ref = this.rows;
@@ -11415,9 +11415,12 @@ window.jQuery = window.$ = jQuery;
         }
         this.head_select++;
         this.selected_from = '';
+        if (this.head_select === 1) {
+          alert('You have selected the headers. Now please select the data range');
+        }
       }
       if (this.head_select === 2) {
-        result = confirm('have you selected the correct data');
+        result = confirm('have you selected the correct data?');
         if (result) {
           return this.create_json();
         } else {
