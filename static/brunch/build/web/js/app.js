@@ -11222,17 +11222,27 @@ window.jQuery = window.$ = jQuery;
   }
   (function() {
     (function() {
-      var cell, index, row, _i, _len, _len2, _ref;
-      __out.push('<div id="worksheet-view">\n  Please select the headers and data in this worksheet. Highlight all headers first (blue color) and\nthen please highlight the data (grey color)\n  <table>\n    ');
+      var cell, index, row, _i, _len, _len2, _len3, _ref, _ref2;
+      __out.push('<div id="worksheet-view">\n  <p>Please select the headers and data in this worksheet. Highlight all headers first (blue color) and\nthen please highlight the data (grey color)</p>\n  <table>\n    <select id="rdf-type"></select>\n    ');
       if (this.rows) {
         __out.push('\n    ');
-        _ref = this.rows;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          row = _ref[_i];
-          __out.push('\n    <tr>\n      ');
-          for (index = 0, _len2 = row.length; index < _len2; index++) {
+        _ref = this.rows[0];
+        for (index = 0, _len = _ref.length; index < _len; index++) {
+          cell = _ref[index];
+          __out.push('\n    <th>\n      <select id="h-');
+          __out.push(__sanitize(index));
+          __out.push('"><option value="ignore">-</option></select>\n    </th>\n    ');
+        }
+        __out.push('\n    ');
+        _ref2 = this.rows;
+        for (_i = 0, _len2 = _ref2.length; _i < _len2; _i++) {
+          row = _ref2[_i];
+          __out.push('\n    <tr>\n      <td>');
+          __out.push(__sanitize(this.rows.indexOf(row) + 1));
+          __out.push('</td>\n      ');
+          for (index = 0, _len3 = row.length; index < _len3; index++) {
             cell = row[index];
-            __out.push('\n      <td id="');
+            __out.push('\n      <td class=\'cell\' id="');
             __out.push(__sanitize(this.rows.indexOf(row) + 1));
             __out.push('-');
             __out.push(__sanitize(index + 1));
@@ -11349,7 +11359,7 @@ window.jQuery = window.$ = jQuery;
     WorksheetView.prototype.data_to = '';
     WorksheetView.prototype.selection_done = 0;
     WorksheetView.prototype.events = {
-      'click td': 'selectCell'
+      'click td.cell': 'selectCell'
     };
     WorksheetView.prototype.render = function(data) {
       var ajaxCall;

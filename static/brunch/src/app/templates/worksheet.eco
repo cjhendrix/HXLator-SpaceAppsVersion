@@ -1,12 +1,19 @@
 <div id="worksheet-view">
-  Please select the headers and data in this worksheet. Highlight all headers first (blue color) and
-then please highlight the data (grey color)
+  <p>Please select the headers and data in this worksheet. Highlight all headers first (blue color) and
+then please highlight the data (grey color)</p>
   <table>
+    <select id="rdf-type"></select>
     <% if @rows: %>
+    <% for cell, index in @rows[0]: %>
+    <th>
+      <select id="h-<%= index %>"><option value="ignore">-</option></select>
+    </th>
+    <% end %>
     <% for row in @rows: %>
     <tr>
+      <td><%= @rows.indexOf(row) + 1 %></td>
       <% for cell,index in row: %>
-      <td id="<%= @rows.indexOf(row) + 1 %>-<%= index + 1 %>"  data-value="<%= cell %>"><%= cell %></td>
+      <td class='cell' id="<%= @rows.indexOf(row) + 1 %>-<%= index + 1 %>"  data-value="<%= cell %>"><%= cell %></td>
       <% end %>
     </tr>
     <% end %>

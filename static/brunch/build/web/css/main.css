@@ -22,13 +22,13 @@ a:focus,a:hover{color:#369;font-weight:bold;text-decoration:underline}
 a{color:#369;font-weight:bold;text-decoration:none}
 ul,ol{margin:0 1.5em 1.5em 0;list-style-type:none}
 #props{position:relative;top:36px;font-size:18px;padding-left:373px;color:#eee;font-style:italic}
-#page{height:100%;width:100%}
+#page{height:100%;width:100%;padding:5px}
 #home-view{height:300px;width:600px;position:relative;margin:0 auto;text-align:center;top:20%}
 #upload-view{height:300px;width:600px;position:relative;margin:0 auto;text-align:center;top:20%}
 #upload-await{height:300px;width:600px;position:relative;margin:0 auto;text-align:center;top:20%;display:none}
 #worksheet-view{z-index:200;}
 #worksheet-view table,#worksheet-view th,#worksheet-view td{border:1px solid #000;vertical-align:top;color:#000}
-#worksheet-view table{border-collapse:collapse}
+#worksheet-view table{border-collapse:collapse;font-size:11px}
 .grey{background-color:#808080}
 .blue{background-color:#09f}
 #head-select{width:300px;height:30px;text-align:center;padding:10px;position:fixed;top:0;margin:0 auto;z-index:500;background-color:#09f;display:none}

@@ -15,7 +15,7 @@ class exports.WorksheetView extends Backbone.View
 
 
   events:
-    'click td' : 'selectCell'
+    'click td.cell' : 'selectCell'
 
   render: (data) =>
     @filepath = data
