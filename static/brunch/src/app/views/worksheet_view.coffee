@@ -4,10 +4,6 @@ class exports.WorksheetView extends Backbone.View
   id: 'worksheet-view'
   el: '#page'
   selected_from : ''
-  head_select : 0
-  head_json : []
-  head_from : ''
-  head_to : ''
   data_json : []
   data_from : ''
   data_to : ''
@@ -16,6 +12,7 @@ class exports.WorksheetView extends Backbone.View
 
   events:
     'click td.cell' : 'selectCell'
+    'change #rdf-type' : 'fill_dropdown_child'
 
   render: (data) =>
     @filepath = data
@@ -28,6 +25,7 @@ class exports.WorksheetView extends Backbone.View
           data:{filename:@filepath}
           success:(data)=>
             $(@el).html worksheetTemplate(data)
+            @fill_dropdown_head()
             return @
           error: =>
             setTimeout ajaxCall, 5000
@@ -37,21 +35,13 @@ class exports.WorksheetView extends Backbone.View
     id = event.currentTarget.id
     if @selected_from == ''
       @selected_from = id
-      if @head_select == 0
-        $('td').removeClass('blue')
-        $('#'+id).addClass('blue')
-      else
-        $('td').removeClass('grey')
-        $('#'+id).addClass('grey')
+      $('td').removeClass('grey')
+      $('#'+id).addClass('grey')
     else
       from = @selected_from.split('-')
       to = id.split('-')
-      if @head_select == 0
-        @head_from = from
-        @head_to = to
-      else
-        @data_from = from
-        @data_to = to
+      @data_from = from
+      @data_to = to
       imin = parseInt(from[0])
       imax = parseInt(to[0]) + 1
       jmin = parseInt(from[1])
@@ -60,26 +50,19 @@ class exports.WorksheetView extends Backbone.View
       while i < imax
         j = jmin
         while j < jmax
-          if @head_select == 0
-            $('#' + i + '-' + j).addClass 'blue'
-          else
-            $('#' + i + '-' + j).addClass 'grey'
+          $('#' + i + '-' + j).addClass 'grey'
           j++
         i++
-      @head_select++
       @selected_from = ''
-      if @head_select == 1
-        alert 'You have selected the headers. Now please select the data range'
-    if @head_select == 2
       result = confirm 'have you selected the correct data?'
       if result
         @create_json()
       else
-        @head_select = 1
+        @selected_from = ''
 
   create_json: =>
-    from = @head_from
-    to = @head_to
+    from = @data_from
+    to = @data_to
     imin = parseInt(from[0])
     imax = parseInt(to[0]) + 1
     jmin = parseInt(from[1])
@@ -93,6 +76,25 @@ class exports.WorksheetView extends Backbone.View
         #sparql here to form the dictionary of headers
         rows.push(id: i+'-'+j, value:data)
         j++
-      @head_json.push(rows)
+      @data_json.push(rows)
       i++
-    console.log @head_json
+    console.log @data_json
+
+  fill_dropdown_head:=>
+    hxl_type = app.hxl.hxltypes
+    hxl_labels = app.hxl.hxllabels
+    for key,value of hxl_type
+      display_label = hxl_labels[key]
+      display_value = key
+      $('#rdf-type').append($("<option></option>").attr("value",display_value).text(display_label))
+
+  fill_dropdown_child:=>
+    parentnode = $('#rdf-type').val()
+    hxl_labels = app.hxl.hxllabels
+    hxl_attribute = app.hxl.hxltypes[parentnode].attributes
+    $('th > select.child-name > option').remove()
+    for value in hxl_attribute
+      display_label = hxl_labels[value]
+      display_value = value
+      $('.child-name').append($("<option></option>").attr("value",display_value).text(display_label))
+

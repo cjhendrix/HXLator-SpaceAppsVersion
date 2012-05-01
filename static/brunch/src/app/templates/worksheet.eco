@@ -1,17 +1,17 @@
 <div id="worksheet-view">
-  <p>Please select the headers and data in this worksheet. Highlight all headers first (blue color) and
-then please highlight the data (grey color)</p>
+  <p>Please select the data in this worksheet. Firstly, please select the corresponding headers from the dropdown available and then highlight all data (grey color)</p>
   <table>
-    <select id="rdf-type"></select>
+    <select id="rdf-type" class='head-name' name="rdf-type"><option></option></select>
     <% if @rows: %>
+    <th></th>
     <% for cell, index in @rows[0]: %>
     <th>
-      <select id="h-<%= index %>"><option value="ignore">-</option></select>
+      <select id="h-<%= index %>" class='child-name' name="h-<%= index %>"><option value="ignore">-</option></select>
     </th>
     <% end %>
     <% for row in @rows: %>
     <tr>
-      <td><%= @rows.indexOf(row) + 1 %></td>
+      <td id="excel-row"><%= @rows.indexOf(row) + 1 %></td>
       <% for cell,index in row: %>
       <td class='cell' id="<%= @rows.indexOf(row) + 1 %>-<%= index + 1 %>"  data-value="<%= cell %>"><%= cell %></td>
       <% end %>

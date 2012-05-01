@@ -11047,6 +11047,7 @@ window.jQuery = window.$ = jQuery;
   app.models = {};
   app.collections = {};
   app.views = {};
+  app.hxl = {};
   MainRouter = require('routers/main_router').MainRouter;
   HomeView = require('views/home_view').HomeView;
   UploadView = require('views/upload_view').UploadView;
@@ -11057,6 +11058,57 @@ window.jQuery = window.$ = jQuery;
       app.views.home = new HomeView();
       app.views.upload = new UploadView();
       app.views.worksheet = new WorksheetView();
+      app.hxl.hxltypes = {
+        displaced: {
+          attributes: ["hhCount", "personCount", "origin", "location", "source", "datadate"],
+          children: ["idp", "refugee", "others"]
+        },
+        distribution: {
+          attributes: ["blanketsProvided", "bucketsProvided", "cotsProvided", "familyTentsProvided", "jerryCansProvided", "kitchenSetsProvided", "largeTentsProvided", "matsProvided", "mosquitoNetsProvided", "nonFoodItemsProvided", "ropeProvided", "sheetsProvided", "tarpaulinProvided", "tentsProvided", "waterFiltersProvided", "toolKitsProvided", "cgiProvided", "hygieneKitsProvided", "blanketsProvided", "groundSheetsProvided", "hhCount", "personCount", "activityDescription", "activityTitle", "actualEnd", "actualStart", "atLocation", "hasStatus", "implementedBy"]
+        }
+      };
+      app.hxl.hxllabels = {
+        displaced: "Displaced People",
+        hhCount: "Number of Households",
+        personCount: "Number of People",
+        source: "Data Source",
+        origin: "Location of Origin",
+        location: "Current Location",
+        datadate: "Date of the Data",
+        idp: "Internally Displaced",
+        refugee: "Refugees and Asylum Seekers",
+        others: "Others of Concern",
+        blanketsProvided: "Blankets Provided",
+        bucketsProvided: "Buckets Provided",
+        cotsProvided: "Cots Provided",
+        familyTentsProvided: "Family Tents Provided",
+        jerryCansProvided: "Jerry Cans Provided",
+        cgiProvided: "CGI Provided",
+        kitchenSetsProvided: "Kitchen Sets Provided",
+        largeTentsProvided: "Large Tents Provided",
+        matsProvided: "Sleeping Mats Provided",
+        mosquitoNetsProvided: "Mosquito Nets Provided",
+        nonFoodItemsProvided: "Non-Food Items Provided",
+        ropeProvided: "Rope Provided (m)",
+        sheetsProvided: "Sheets Provided",
+        tarpaulinProvided: "Tarpaulins Provided",
+        tentsProvided: "Tents Provided",
+        waterFiltersProvided: "Water Filters Provided",
+        toolKitsProvided: "Tool Kits Provided",
+        hygieneKitsProvided: "Hygiene Kits Provided",
+        blanketsProvided: "Blankets Provided",
+        groundSheetsProvided: "Ground Sheets Provided",
+        hhCount: "Households reached",
+        personCount: "Persons reached",
+        activityDescription: "Activity Description",
+        activityTitle: "Activity Title",
+        actualEnd: "Actual End Date",
+        actualStart: "Actual Start Date",
+        atLocation: "Location",
+        hasStatus: "Status of the Activity",
+        implementedBy: "Implementing Organization",
+        distribution: "Distribution"
+      };
       if (Backbone.history.getFragment() === '') {
         return app.routers.main.navigate('home', true);
       }
@@ -11223,13 +11275,15 @@ window.jQuery = window.$ = jQuery;
   (function() {
     (function() {
       var cell, index, row, _i, _len, _len2, _len3, _ref, _ref2;
-      __out.push('<div id="worksheet-view">\n  <p>Please select the headers and data in this worksheet. Highlight all headers first (blue color) and\nthen please highlight the data (grey color)</p>\n  <table>\n    <select id="rdf-type"></select>\n    ');
+      __out.push('<div id="worksheet-view">\n  <p>Please select the data in this worksheet. Firstly, please select the corresponding headers from the dropdown available and then highlight all data (grey color)</p>\n  <table>\n    <select id="rdf-type" class=\'head-name\' name="rdf-type"><option></option></select>\n    ');
       if (this.rows) {
-        __out.push('\n    ');
+        __out.push('\n    <th></th>\n    ');
         _ref = this.rows[0];
         for (index = 0, _len = _ref.length; index < _len; index++) {
           cell = _ref[index];
           __out.push('\n    <th>\n      <select id="h-');
+          __out.push(__sanitize(index));
+          __out.push('" class=\'child-name\' name="h-');
           __out.push(__sanitize(index));
           __out.push('"><option value="ignore">-</option></select>\n    </th>\n    ');
         }
@@ -11237,7 +11291,7 @@ window.jQuery = window.$ = jQuery;
         _ref2 = this.rows;
         for (_i = 0, _len2 = _ref2.length; _i < _len2; _i++) {
           row = _ref2[_i];
-          __out.push('\n    <tr>\n      <td>');
+          __out.push('\n    <tr>\n      <td id="excel-row">');
           __out.push(__sanitize(this.rows.indexOf(row) + 1));
           __out.push('</td>\n      ');
           for (index = 0, _len3 = row.length; index < _len3; index++) {
@@ -11342,6 +11396,8 @@ window.jQuery = window.$ = jQuery;
   exports.WorksheetView = (function() {
     __extends(WorksheetView, Backbone.View);
     function WorksheetView() {
+      this.fill_dropdown_child = __bind(this.fill_dropdown_child, this);
+      this.fill_dropdown_head = __bind(this.fill_dropdown_head, this);
       this.create_json = __bind(this.create_json, this);
       this.selectCell = __bind(this.selectCell, this);
       this.render = __bind(this.render, this);
@@ -11350,16 +11406,13 @@ window.jQuery = window.$ = jQuery;
     WorksheetView.prototype.id = 'worksheet-view';
     WorksheetView.prototype.el = '#page';
     WorksheetView.prototype.selected_from = '';
-    WorksheetView.prototype.head_select = 0;
-    WorksheetView.prototype.head_json = [];
-    WorksheetView.prototype.head_from = '';
-    WorksheetView.prototype.head_to = '';
     WorksheetView.prototype.data_json = [];
     WorksheetView.prototype.data_from = '';
     WorksheetView.prototype.data_to = '';
     WorksheetView.prototype.selection_done = 0;
     WorksheetView.prototype.events = {
-      'click td.cell': 'selectCell'
+      'click td.cell': 'selectCell',
+      'change #rdf-type': 'fill_dropdown_child'
     };
     WorksheetView.prototype.render = function(data) {
       var ajaxCall;
@@ -11375,6 +11428,7 @@ window.jQuery = window.$ = jQuery;
             },
             success: __bind(function(data) {
               $(this.el).html(worksheetTemplate(data));
+              this.fill_dropdown_head();
               return this;
             }, this),
             error: __bind(function() {
@@ -11389,23 +11443,13 @@ window.jQuery = window.$ = jQuery;
       id = event.currentTarget.id;
       if (this.selected_from === '') {
         this.selected_from = id;
-        if (this.head_select === 0) {
-          $('td').removeClass('blue');
-          $('#' + id).addClass('blue');
-        } else {
-          $('td').removeClass('grey');
-          $('#' + id).addClass('grey');
-        }
+        $('td').removeClass('grey');
+        return $('#' + id).addClass('grey');
       } else {
         from = this.selected_from.split('-');
         to = id.split('-');
-        if (this.head_select === 0) {
-          this.head_from = from;
-          this.head_to = to;
-        } else {
-          this.data_from = from;
-          this.data_to = to;
-        }
+        this.data_from = from;
+        this.data_to = to;
         imin = parseInt(from[0]);
         imax = parseInt(to[0]) + 1;
         jmin = parseInt(from[1]);
@@ -11414,34 +11458,24 @@ window.jQuery = window.$ = jQuery;
         while (i < imax) {
           j = jmin;
           while (j < jmax) {
-            if (this.head_select === 0) {
-              $('#' + i + '-' + j).addClass('blue');
-            } else {
-              $('#' + i + '-' + j).addClass('grey');
-            }
+            $('#' + i + '-' + j).addClass('grey');
             j++;
           }
           i++;
         }
-        this.head_select++;
         this.selected_from = '';
-        if (this.head_select === 1) {
-          alert('You have selected the headers. Now please select the data range');
-        }
-      }
-      if (this.head_select === 2) {
         result = confirm('have you selected the correct data?');
         if (result) {
           return this.create_json();
         } else {
-          return this.head_select = 1;
+          return this.selected_from = '';
         }
       }
     };
     WorksheetView.prototype.create_json = function() {
       var data, from, i, imax, imin, j, jmax, jmin, rows, to;
-      from = this.head_from;
-      to = this.head_to;
+      from = this.data_from;
+      to = this.data_to;
       imin = parseInt(from[0]);
       imax = parseInt(to[0]) + 1;
       jmin = parseInt(from[1]);
@@ -11458,10 +11492,38 @@ window.jQuery = window.$ = jQuery;
           });
           j++;
         }
-        this.head_json.push(rows);
+        this.data_json.push(rows);
         i++;
       }
-      return console.log(this.head_json);
+      return console.log(this.data_json);
+    };
+    WorksheetView.prototype.fill_dropdown_head = function() {
+      var display_label, display_value, hxl_labels, hxl_type, key, value, _results;
+      hxl_type = app.hxl.hxltypes;
+      hxl_labels = app.hxl.hxllabels;
+      _results = [];
+      for (key in hxl_type) {
+        value = hxl_type[key];
+        display_label = hxl_labels[key];
+        display_value = key;
+        _results.push($('#rdf-type').append($("<option></option>").attr("value", display_value).text(display_label)));
+      }
+      return _results;
+    };
+    WorksheetView.prototype.fill_dropdown_child = function() {
+      var display_label, display_value, hxl_attribute, hxl_labels, parentnode, value, _i, _len, _results;
+      parentnode = $('#rdf-type').val();
+      hxl_labels = app.hxl.hxllabels;
+      hxl_attribute = app.hxl.hxltypes[parentnode].attributes;
+      $('th > select.child-name > option').remove();
+      _results = [];
+      for (_i = 0, _len = hxl_attribute.length; _i < _len; _i++) {
+        value = hxl_attribute[_i];
+        display_label = hxl_labels[value];
+        display_value = value;
+        _results.push($('.child-name').append($("<option></option>").attr("value", display_value).text(display_label)));
+      }
+      return _results;
     };
     return WorksheetView;
   })();
