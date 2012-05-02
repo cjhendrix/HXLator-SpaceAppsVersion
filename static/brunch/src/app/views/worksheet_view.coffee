@@ -92,8 +92,8 @@ class exports.WorksheetView extends Backbone.View
       #console.log selected_cell
       @head_json.push(selected_cell)
       i++
-    console.log @head_json
-    console.log @head_json[12]
+    #console.log @head_json
+    #console.log @head_json[12]
     @create_data_json()
 
   create_data_json: =>
@@ -142,7 +142,7 @@ class exports.WorksheetView extends Backbone.View
       for cell, i in row.cells
         header = data.headers[i]
         @converted_hxl += "<#{data.type}/#{row.id}> <#{header}> #{cell} .\n"
-    #console.log @converted_hxl
+    console.log @converted_hxl
 
   fill_dropdown_head:=>
     hxl_type = app.hxl.hxltypes
