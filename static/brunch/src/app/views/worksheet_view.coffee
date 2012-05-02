@@ -5,9 +5,14 @@ class exports.WorksheetView extends Backbone.View
   el: '#page'
   selected_from : ''
   data_json : []
+  head_json : []
   data_from : ''
   data_to : ''
   selection_done : 0
+  colmin : 0
+  colmax : 0
+  converted_hxl : ''
+  total_data : {}
 
 
   events:
@@ -56,11 +61,42 @@ class exports.WorksheetView extends Backbone.View
       @selected_from = ''
       result = confirm 'have you selected the correct data?'
       if result
-        @create_json()
+        @create_head_json()
       else
         @selected_from = ''
+#    rows = []
+#    for i in [range.rowmin..range.rowmax]
+    # sparql should generate the id << the generation of id based on carsten's code is using getTime()
+    # and maybe even the whole row directly as hxl
+#      row = {id: Math.floor(1000000*Math.random()), cells:[]}
+#      rows.push(row)
+#      for j in [range.colmin..range.colmax]
+#        unless skipped[j-range.colmin]
+#        # td with attribute data-value
+#        val = $("##{i}-#{j}").data("value")
+#        row.cells.push( val )
 
-  create_json: =>
+  create_head_json: =>
+    from = @data_from
+    to = @data_to
+    imin = parseInt(from[0])
+    imax = parseInt(to[0])
+    jmin = parseInt(from[1])
+    @colmin = jmin
+    jmax = parseInt(to[1]) + 1
+    @colmax = jmax
+
+    i = @colmin
+    while i < @colmax
+      selected_cell = $("#h-#{i}").val()
+      #console.log selected_cell
+      @head_json.push(selected_cell)
+      i++
+    console.log @head_json
+    console.log @head_json[12]
+    @create_data_json()
+
+  create_data_json: =>
     from = @data_from
     to = @data_to
     imin = parseInt(from[0])
@@ -69,16 +105,44 @@ class exports.WorksheetView extends Backbone.View
     jmax = parseInt(to[1]) + 1
     i = imin
     while i < imax
-      rows = []
       j = jmin
+      now = new Date()
+      id = now.getTime()
+      row = {id:id, cells:[]}
       while j < jmax
         data = $('#' + i + '-' + j).data('value')
-        #sparql here to form the dictionary of headers
-        rows.push(id: i+'-'+j, value:data)
+        row.cells.push(data)
         j++
-      @data_json.push(rows)
+      @data_json.push(row)
       i++
-    console.log @data_json
+    @generate_total_data()
+
+  generate_total_data:=>
+    @total_data = {
+                    rows:@data_json,
+                    type: $('#rdf-type').val(),
+                    headers:@head_json
+                  }
+    @process_data(@total_data)
+    #console.log @total_data
+#    @process_data(@total_data)
+# converts json data to a kind of dummy hxl format
+# that should be displayed to the user somehow
+#  data_to_hxl : (data) =>
+#    converted = ""
+#    for row in data.rows
+#      for cell, i in row.cells
+#        header = data.headers[i]
+#        converted += "<#{data.type}/#{row.id}> <#{header}> #{cell} .\n"
+#    converted
+
+  process_data: (data) =>
+    #console.log data.headers[12]
+    for row in data.rows
+      for cell, i in row.cells
+        header = data.headers[i]
+        @converted_hxl += "<#{data.type}/#{row.id}> <#{header}> #{cell} .\n"
+    #console.log @converted_hxl
 
   fill_dropdown_head:=>
     hxl_type = app.hxl.hxltypes
@@ -97,4 +161,64 @@ class exports.WorksheetView extends Backbone.View
       display_label = hxl_labels[value]
       display_value = value
       $('.child-name').append($("<option></option>").attr("value",display_value).text(display_label))
+
+#  isoDateString:(d)=>
+#    pad (n) =>
+#      if n < 10 
+#        return '0'+n
+#      else 
+#        return n
+#    return d.getUTCFullYear()+'-'+ d.getUTCFullYear()+'-'+ pad(d.getUTCMonth()+1)+'-'+ pad(d.getUTCDate())+'T'+ pad(d.getUTCHours())+':'+ pad(d.getUTCMinutes())+':'+ pad(d.getUTCSeconds())+'Z'
+
+
+
+
+# returns an object that describes a the range of a selection
+# the arguments must of the form '0-1', '0-2', etc...
+#  selection_range : (from_id, to_id) =>
+#    from = from_id.split('-')
+#    to = to_id.split('-')
+#    rowmin : Math.min(parseInt(from[0],10),parseInt(to[0],10))
+#    rowmax:  Math.max(parseInt(from[0],10),parseInt(to[0],10))
+#	   colmin: Math.min(parseInt(from[1],10),parseInt(to[1],10))
+#	   colmax:  Math.max(parseInt(from[1],10),parseInt(to[1],10))
+
+# reads the data from the table
+# and returns it in the format accepted by data_to_hxl
+# the headers must be select fields with ids like h-0, h-1, etc...
+# the cells (td) must have ids like 0-1, 0-2, etc...
+# and an attribute data-value
+# the arguments must be of the same form as cell ids '0-1' etc..
+#  selected_data : (selected_from, selected_to) =>
+#    range = selection_range(selected_from, selected_to)
+
+#    headers = []
+#    skipped = []
+#    for j in [range.colmin..range.colmax]
+#      selected = $("#h-#{j}").val() # a select field
+#      skip = (selected == "ignore")
+#      skipped.push(skip)
+#      headers.push(selected) unless skip
+
+
+#    data = {
+#          rows: rows,
+#          type: $('#rdf-type').val(), # a select field
+#          headers: headers }
+
+
+  
+
+
+# test data in the format that data_to_hxl accepts
+#  test_data: =>
+#    {
+#    type: 'affectedPopulation',
+#    headers: ['location','rope','tents'],
+#    rows: [{
+#          id: 1234,
+#          cells: ['dubai',50, 10]},
+#          {
+#          id: 14567,
+#          cells: ['new york', 40, 9]}]}
 

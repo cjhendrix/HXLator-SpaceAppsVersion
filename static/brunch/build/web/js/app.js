@@ -11398,7 +11398,10 @@ window.jQuery = window.$ = jQuery;
     function WorksheetView() {
       this.fill_dropdown_child = __bind(this.fill_dropdown_child, this);
       this.fill_dropdown_head = __bind(this.fill_dropdown_head, this);
-      this.create_json = __bind(this.create_json, this);
+      this.process_data = __bind(this.process_data, this);
+      this.generate_total_data = __bind(this.generate_total_data, this);
+      this.create_data_json = __bind(this.create_data_json, this);
+      this.create_head_json = __bind(this.create_head_json, this);
       this.selectCell = __bind(this.selectCell, this);
       this.render = __bind(this.render, this);
       WorksheetView.__super__.constructor.apply(this, arguments);
@@ -11407,9 +11410,14 @@ window.jQuery = window.$ = jQuery;
     WorksheetView.prototype.el = '#page';
     WorksheetView.prototype.selected_from = '';
     WorksheetView.prototype.data_json = [];
+    WorksheetView.prototype.head_json = [];
     WorksheetView.prototype.data_from = '';
     WorksheetView.prototype.data_to = '';
     WorksheetView.prototype.selection_done = 0;
+    WorksheetView.prototype.colmin = 0;
+    WorksheetView.prototype.colmax = 0;
+    WorksheetView.prototype.converted_hxl = '';
+    WorksheetView.prototype.total_data = {};
     WorksheetView.prototype.events = {
       'click td.cell': 'selectCell',
       'change #rdf-type': 'fill_dropdown_child'
@@ -11466,14 +11474,34 @@ window.jQuery = window.$ = jQuery;
         this.selected_from = '';
         result = confirm('have you selected the correct data?');
         if (result) {
-          return this.create_json();
+          return this.create_head_json();
         } else {
           return this.selected_from = '';
         }
       }
     };
-    WorksheetView.prototype.create_json = function() {
-      var data, from, i, imax, imin, j, jmax, jmin, rows, to;
+    WorksheetView.prototype.create_head_json = function() {
+      var from, i, imax, imin, jmax, jmin, selected_cell, to;
+      from = this.data_from;
+      to = this.data_to;
+      imin = parseInt(from[0]);
+      imax = parseInt(to[0]);
+      jmin = parseInt(from[1]);
+      this.colmin = jmin;
+      jmax = parseInt(to[1]) + 1;
+      this.colmax = jmax;
+      i = this.colmin;
+      while (i < this.colmax) {
+        selected_cell = $("#h-" + i).val();
+        this.head_json.push(selected_cell);
+        i++;
+      }
+      console.log(this.head_json);
+      console.log(this.head_json[12]);
+      return this.create_data_json();
+    };
+    WorksheetView.prototype.create_data_json = function() {
+      var data, from, i, id, imax, imin, j, jmax, jmin, now, row, to;
       from = this.data_from;
       to = this.data_to;
       imin = parseInt(from[0]);
@@ -11482,20 +11510,50 @@ window.jQuery = window.$ = jQuery;
       jmax = parseInt(to[1]) + 1;
       i = imin;
       while (i < imax) {
-        rows = [];
         j = jmin;
+        now = new Date();
+        id = now.getTime();
+        row = {
+          id: id,
+          cells: []
+        };
         while (j < jmax) {
           data = $('#' + i + '-' + j).data('value');
-          rows.push({
-            id: i + '-' + j,
-            value: data
-          });
+          row.cells.push(data);
           j++;
         }
-        this.data_json.push(rows);
+        this.data_json.push(row);
         i++;
       }
-      return console.log(this.data_json);
+      return this.generate_total_data();
+    };
+    WorksheetView.prototype.generate_total_data = function() {
+      this.total_data = {
+        rows: this.data_json,
+        type: $('#rdf-type').val(),
+        headers: this.head_json
+      };
+      return this.process_data(this.total_data);
+    };
+    WorksheetView.prototype.process_data = function(data) {
+      var cell, header, i, row, _i, _len, _ref, _results;
+      _ref = data.rows;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        row = _ref[_i];
+        _results.push((function() {
+          var _len2, _ref2, _results2;
+          _ref2 = row.cells;
+          _results2 = [];
+          for (i = 0, _len2 = _ref2.length; i < _len2; i++) {
+            cell = _ref2[i];
+            header = data.headers[i];
+            _results2.push(this.converted_hxl += "<" + data.type + "/" + row.id + "> <" + header + "> " + cell + " .\n");
+          }
+          return _results2;
+        }).call(this));
+      }
+      return _results;
     };
     WorksheetView.prototype.fill_dropdown_head = function() {
       var display_label, display_value, hxl_labels, hxl_type, key, value, _results;
