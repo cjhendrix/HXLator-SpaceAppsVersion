@@ -53,7 +53,12 @@ def save_file(inputfile):
     inputfile.save(filepath)
     return filepath
 
-@app.route('/fetch_rows/',methods=['GET','POST'])
+@app.route('/handle_hxl/',methods=['POST','GET'])
+def handle_hxl():
+    hxldata=request.values.get('hxlcode')
+    return 'hxl data submitted'
+
+@app.route('/fetch_rows/',methods=['POST','GET'])
 def fetch_rows():
     filename = request.values.get('filename')
     final_file = [i for i in filename.split('\\')]

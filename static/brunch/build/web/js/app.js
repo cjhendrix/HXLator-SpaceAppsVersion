@@ -11308,7 +11308,7 @@ window.jQuery = window.$ = jQuery;
           }
           __out.push('\n    </tr>\n    ');
         }
-        __out.push('\n  </table>\n</div>\n<div id="spotlight">\n</div>\n<div id="hxlresult">\n    <form id="submitform" action ="http://83.169.33.54:8080/parliament/sparql" method="POST"  target="updateFrame" >\n      <textarea id="hxlcode" name="hxlcode" disabled=disabled></textarea><br/>\n      <input type="image" id="submitme" src="/static/img/submit.png" value="Submit HXL File"/>\n    </form>\n    <iframe name="updateFrame" id="updateFrame" width="1px" height="1px"></iframe>\n</div>\n\n');
+        __out.push('\n  </table>\n</div>\n<div id="spotlight">\n</div>\n<div id="hxlresult">\n    <form id="submitform" action ="/handle_hxl/" method="POST"  target="updateFrame" >\n      <textarea id="hxlcode" name="hxlcode" disabled=disabled></textarea><br/>\n      <input type="image" id="submitme" src="/static/img/submit.png" value="Submit HXL File"/>\n    </form>\n    <iframe name="updateFrame" id="updateFrame" width="1px" height="1px"></iframe>\n</div>\n\n');
       }
     }).call(this);
     
@@ -11396,6 +11396,7 @@ window.jQuery = window.$ = jQuery;
   exports.WorksheetView = (function() {
     __extends(WorksheetView, Backbone.View);
     function WorksheetView() {
+      this.submit_hxl = __bind(this.submit_hxl, this);
       this.fill_dropdown_child = __bind(this.fill_dropdown_child, this);
       this.fill_dropdown_head = __bind(this.fill_dropdown_head, this);
       this.process_data = __bind(this.process_data, this);
@@ -11418,7 +11419,8 @@ window.jQuery = window.$ = jQuery;
     WorksheetView.prototype.total_data = {};
     WorksheetView.prototype.events = {
       'click td.cell': 'selectCell',
-      'change #rdf-type': 'fill_dropdown_child'
+      'change #rdf-type': 'fill_dropdown_child',
+      'click #submitme': 'submit_hxl'
     };
     WorksheetView.prototype.render = function(data) {
       var ajaxCall;
@@ -11583,6 +11585,16 @@ window.jQuery = window.$ = jQuery;
         _results.push($('.child-name').append($("<option></option>").attr("value", display_value).text(display_label)));
       }
       return _results;
+    };
+    WorksheetView.prototype.submit_hxl = function(event) {
+      var dosubmit;
+      event.preventDefault();
+      dosubmit = confirm('do you wish to submit the HXL data to the data repository?');
+      if (dosubmit) {
+        $('#submitform').submit();
+        alert('Your HXL data has been submitted. Thank your for contributing');
+        return location.hash = 'home';
+      }
     };
     return WorksheetView;
   })();

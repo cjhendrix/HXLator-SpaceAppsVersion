@@ -16,6 +16,7 @@ class exports.WorksheetView extends Backbone.View
   events:
     'click td.cell' : 'selectCell'
     'change #rdf-type' : 'fill_dropdown_child'
+    'click #submitme' : 'submit_hxl'
 
   render: (data) =>
     @filepath = data
@@ -143,8 +144,14 @@ class exports.WorksheetView extends Backbone.View
       display_label = hxl_labels[value]
       display_value = value
       $('.child-name').append($("<option></option>").attr("value",display_value).text(display_label))
-
-#  isoDateString:(d)=>
+  
+  submit_hxl:(event) =>
+    event.preventDefault()
+    dosubmit = confirm 'do you wish to submit the HXL data to the data repository?'
+    if dosubmit
+      $('#submitform').submit()
+      alert 'Your HXL data has been submitted. Thank your for contributing'
+      location.hash = 'home'#  isoDateString:(d)=>
 #    pad (n) =>
 #      if n < 10 
 #        return '0'+n
