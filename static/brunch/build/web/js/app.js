@@ -11308,7 +11308,7 @@ window.jQuery = window.$ = jQuery;
           }
           __out.push('\n    </tr>\n    ');
         }
-        __out.push('\n  </table>\n</div>\n\n');
+        __out.push('\n  </table>\n</div>\n<div id="spotlight">\n</div>\n<div id="hxlresult">\n    <form id="submitform" action ="http://83.169.33.54:8080/parliament/sparql" method="POST"  target="updateFrame" >\n      <textarea id="hxlcode" name="hxlcode" disabled=disabled></textarea><br/>\n      <input type="image" id="submitme" src="/static/img/submit.png" value="Submit HXL File"/>\n    </form>\n    <iframe name="updateFrame" id="updateFrame" width="1px" height="1px"></iframe>\n</div>\n\n');
       }
     }).call(this);
     
@@ -11532,7 +11532,7 @@ window.jQuery = window.$ = jQuery;
       return this.process_data(this.total_data);
     };
     WorksheetView.prototype.process_data = function(data) {
-      var cell, header, i, row, _i, _len, _len2, _ref, _ref2;
+      var cell, header, hxlspacing, hxltop, i, row, scrHeight, scrWidth, _i, _len, _len2, _ref, _ref2;
       this.converted_hxl = [];
       _ref = data.rows;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -11546,7 +11546,14 @@ window.jQuery = window.$ = jQuery;
           }
         }
       }
-      return console.log(this.converted_hxl);
+      scrWidth = $(window).width();
+      scrHeight = $(window).height();
+      hxlspacing = (scrWidth - 605) / 2;
+      hxltop = (scrHeight - 440) / 2;
+      $('#hxlcode').val(this.converted_hxl);
+      $('#hxlresult').css('left', hxlspacing).css('top', hxltop);
+      $('#spotlight').fadeIn('fast');
+      return $('#hxlresult').fadeIn('fast');
     };
     WorksheetView.prototype.fill_dropdown_head = function() {
       var display_label, display_value, hxl_labels, hxl_type, key, value, _results;

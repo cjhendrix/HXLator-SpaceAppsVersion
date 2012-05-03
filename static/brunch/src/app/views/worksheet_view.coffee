@@ -115,7 +115,15 @@ class exports.WorksheetView extends Backbone.View
         header = data.headers[i]
         if cell != '' and header != 'ignore'
           @converted_hxl += "<#{data.type}/#{row.id}> <#{header}> #{cell} .\n"
-    console.log @converted_hxl
+    scrWidth = $(window).width()
+    scrHeight = $(window).height()
+    hxlspacing = (scrWidth - 605)/2
+    hxltop = (scrHeight - 440)/2
+    $('#hxlcode').val(@converted_hxl)
+    $('#hxlresult').css('left',hxlspacing).css('top',hxltop)
+    $('#spotlight').fadeIn('fast')
+    $('#hxlresult').fadeIn('fast')
+    #console.log @converted_hxl
 
   fill_dropdown_head:=>
     hxl_type = app.hxl.hxltypes
