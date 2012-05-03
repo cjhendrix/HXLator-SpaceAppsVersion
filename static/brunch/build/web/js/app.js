@@ -11414,8 +11414,6 @@ window.jQuery = window.$ = jQuery;
     WorksheetView.prototype.data_from = '';
     WorksheetView.prototype.data_to = '';
     WorksheetView.prototype.selection_done = 0;
-    WorksheetView.prototype.colmin = 0;
-    WorksheetView.prototype.colmax = 0;
     WorksheetView.prototype.converted_hxl = '';
     WorksheetView.prototype.total_data = {};
     WorksheetView.prototype.events = {
@@ -11487,11 +11485,10 @@ window.jQuery = window.$ = jQuery;
       imin = parseInt(from[0]);
       imax = parseInt(to[0]);
       jmin = parseInt(from[1]);
-      this.colmin = jmin;
-      jmax = parseInt(to[1]) + 1;
-      this.colmax = jmax;
-      i = this.colmin;
-      while (i < this.colmax) {
+      jmax = parseInt(to[1]);
+      this.head_json = [];
+      i = 0;
+      while (i < jmax) {
         selected_cell = $("#h-" + i).val();
         this.head_json.push(selected_cell);
         i++;
@@ -11507,6 +11504,7 @@ window.jQuery = window.$ = jQuery;
       jmin = parseInt(from[1]);
       jmax = parseInt(to[1]) + 1;
       i = imin;
+      this.data_json = [];
       while (i < imax) {
         j = jmin;
         now = new Date();
@@ -11535,6 +11533,7 @@ window.jQuery = window.$ = jQuery;
     };
     WorksheetView.prototype.process_data = function(data) {
       var cell, header, i, row, _i, _len, _len2, _ref, _ref2;
+      this.converted_hxl = [];
       _ref = data.rows;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
@@ -11542,7 +11541,9 @@ window.jQuery = window.$ = jQuery;
         for (i = 0, _len2 = _ref2.length; i < _len2; i++) {
           cell = _ref2[i];
           header = data.headers[i];
-          this.converted_hxl += "<" + data.type + "/" + row.id + "> <" + header + "> " + cell + " .\n";
+          if (cell !== '') {
+            this.converted_hxl += "<" + data.type + "/" + row.id + "> <" + header + "> " + cell + " .\n";
+          }
         }
       }
       return console.log(this.converted_hxl);

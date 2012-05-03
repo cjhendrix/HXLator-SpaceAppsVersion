@@ -9,8 +9,6 @@ class exports.WorksheetView extends Backbone.View
   data_from : ''
   data_to : ''
   selection_done : 0
-  colmin : 0
-  colmax : 0
   converted_hxl : ''
   total_data : {}
 
@@ -64,17 +62,6 @@ class exports.WorksheetView extends Backbone.View
         @create_head_json()
       else
         @selected_from = ''
-#    rows = []
-#    for i in [range.rowmin..range.rowmax]
-    # sparql should generate the id << the generation of id based on carsten's code is using getTime()
-    # and maybe even the whole row directly as hxl
-#      row = {id: Math.floor(1000000*Math.random()), cells:[]}
-#      rows.push(row)
-#      for j in [range.colmin..range.colmax]
-#        unless skipped[j-range.colmin]
-#        # td with attribute data-value
-#        val = $("##{i}-#{j}").data("value")
-#        row.cells.push( val )
 
   create_head_json: =>
     from = @data_from
@@ -82,18 +69,13 @@ class exports.WorksheetView extends Backbone.View
     imin = parseInt(from[0])
     imax = parseInt(to[0])
     jmin = parseInt(from[1])
-    @colmin = jmin
-    jmax = parseInt(to[1]) + 1
-    @colmax = jmax
-
-    i = @colmin
-    while i < @colmax
+    jmax = parseInt(to[1])
+    @head_json = []
+    i = 0
+    while i < jmax
       selected_cell = $("#h-#{i}").val()
-      #console.log selected_cell
       @head_json.push(selected_cell)
       i++
-    #console.log @head_json
-    #console.log @head_json[12]
     @create_data_json()
 
   create_data_json: =>
@@ -104,6 +86,7 @@ class exports.WorksheetView extends Backbone.View
     jmin = parseInt(from[1])
     jmax = parseInt(to[1]) + 1
     i = imin
+    @data_json = []
     while i < imax
       j = jmin
       now = new Date()
@@ -124,24 +107,14 @@ class exports.WorksheetView extends Backbone.View
                     headers:@head_json
                   }
     @process_data(@total_data)
-    #console.log @total_data
-#    @process_data(@total_data)
-# converts json data to a kind of dummy hxl format
-# that should be displayed to the user somehow
-#  data_to_hxl : (data) =>
-#    converted = ""
-#    for row in data.rows
-#      for cell, i in row.cells
-#        header = data.headers[i]
-#        converted += "<#{data.type}/#{row.id}> <#{header}> #{cell} .\n"
-#    converted
 
   process_data: (data) =>
-    #console.log data.headers[12]
+    @converted_hxl = []
     for row in data.rows
       for cell, i in row.cells
         header = data.headers[i]
-        @converted_hxl += "<#{data.type}/#{row.id}> <#{header}> #{cell} .\n"
+        if cell != ''
+          @converted_hxl += "<#{data.type}/#{row.id}> <#{header}> #{cell} .\n"
     console.log @converted_hxl
 
   fill_dropdown_head:=>
@@ -169,9 +142,6 @@ class exports.WorksheetView extends Backbone.View
 #      else 
 #        return n
 #    return d.getUTCFullYear()+'-'+ d.getUTCFullYear()+'-'+ pad(d.getUTCMonth()+1)+'-'+ pad(d.getUTCDate())+'T'+ pad(d.getUTCHours())+':'+ pad(d.getUTCMinutes())+':'+ pad(d.getUTCSeconds())+'Z'
-
-
-
 
 # returns an object that describes a the range of a selection
 # the arguments must of the form '0-1', '0-2', etc...
