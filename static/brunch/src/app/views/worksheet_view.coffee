@@ -113,7 +113,7 @@ class exports.WorksheetView extends Backbone.View
     for row in data.rows
       for cell, i in row.cells
         header = data.headers[i]
-        if cell != ''
+        if cell != '' and header != 'ignore'
           @converted_hxl += "<#{data.type}/#{row.id}> <#{header}> #{cell} .\n"
     console.log @converted_hxl
 
@@ -130,6 +130,7 @@ class exports.WorksheetView extends Backbone.View
     hxl_labels = app.hxl.hxllabels
     hxl_attribute = app.hxl.hxltypes[parentnode].attributes
     $('th > select.child-name > option').remove()
+    $('.child-name').append($('<option></option>').attr("value","ignore").text("--ignore this column"))
     for value in hxl_attribute
       display_label = hxl_labels[value]
       display_value = value

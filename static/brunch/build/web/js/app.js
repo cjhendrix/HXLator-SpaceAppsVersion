@@ -11285,7 +11285,7 @@ window.jQuery = window.$ = jQuery;
           __out.push(__sanitize(index));
           __out.push('" class=\'child-name\' name="h-');
           __out.push(__sanitize(index));
-          __out.push('"><option value="ignore">-</option></select>\n    </th>\n    ');
+          __out.push('">\n        <option value="ignore">--ignore this column</option>\n      </select>\n    </th>\n    ');
         }
         __out.push('\n    ');
         _ref2 = this.rows;
@@ -11541,7 +11541,7 @@ window.jQuery = window.$ = jQuery;
         for (i = 0, _len2 = _ref2.length; i < _len2; i++) {
           cell = _ref2[i];
           header = data.headers[i];
-          if (cell !== '') {
+          if (cell !== '' && header !== 'ignore') {
             this.converted_hxl += "<" + data.type + "/" + row.id + "> <" + header + "> " + cell + " .\n";
           }
         }
@@ -11567,6 +11567,7 @@ window.jQuery = window.$ = jQuery;
       hxl_labels = app.hxl.hxllabels;
       hxl_attribute = app.hxl.hxltypes[parentnode].attributes;
       $('th > select.child-name > option').remove();
+      $('.child-name').append($('<option></option>').attr("value", "ignore").text("--ignore this column"));
       _results = [];
       for (_i = 0, _len = hxl_attribute.length; _i < _len; _i++) {
         value = hxl_attribute[_i];

@@ -6,7 +6,9 @@
     <th></th>
     <% for cell, index in @rows[0]: %>
     <th>
-      <select id="h-<%= index %>" class='child-name' name="h-<%= index %>"><option value="ignore">-</option></select>
+      <select id="h-<%= index %>" class='child-name' name="h-<%= index %>">
+        <option value="ignore">--ignore this column</option>
+      </select>
     </th>
     <% end %>
     <% for row in @rows: %>
