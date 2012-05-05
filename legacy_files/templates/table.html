@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <title>HXLator</title>
+  <style type="text/css">
+    table, th, td {
+    border: 1px solid black;
+    }
+    table {
+    border-collapse:collapse;
+    }  
+    .grey{
+      background-color: grey;
+    }
+  </style>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $('td').click(function(event){
+        select_cell(event.target.id);
+      }
+       );
+    });
+
+    var selected_from = 0;
+
+    function select_cell(id){
+        if(selected_from === 0){
+            selected_from = id;
+            $("td").removeClass("grey");
+            $("#"+id).addClass("grey");
+        }else{
+            var from, to, i, imin, imax, j, jmin, jmax;
+            foreach_cell(selected_from, id, function(i,j){
+                $("#"+i+"-"+j).addClass('grey');
+            });
+            alert('The greyed cell will now be imported into HXL');
+            selected_from = 0;              
+        }
+    }
+
+    function foreach_cell(from_id, to_id, callback){
+            var from, to, i, imin, imax, j, jmin, jmax;
+            from = from_id.split('-');
+            to = to_id.split('-');
+            imin = Math.min(parseInt(from[0],10),parseInt(to[0],10));
+            imax = Math.max(parseInt(from[0],10),parseInt(to[0],10))+1;
+            jmin = Math.min(parseInt(from[1],10),parseInt(to[1],10));
+            jmax = Math.max(parseInt(from[1],10),parseInt(to[1],10))+1;
+            for(var i=imin; i<imax; i++){ 
+              for(var j=jmin; j<jmax; j++){ 
+                 callback(i,j);
+              }
+            }
+    }
+  </script>
+
+</head>
+<body>
+  <table>
+    {% for i in range(rows|count) %}
+    <tr>
+      {% for j in range(rows[i]|count) %}
+      <td id="{{i}}-{{j}}" data-key="{{i}}-{{j}}" data-value="{{ rows[i][j] }}">{{ rows[i][j] }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+
+</body>
+</html>

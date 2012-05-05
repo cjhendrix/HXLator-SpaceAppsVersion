@@ -1,0 +1,47 @@
+html{margin:0;padding:0;border:0}
+body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,code,del,dfn,em,img,q,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,dialog,figure,footer,header,hgroup,nav,section{margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline}
+article,aside,dialog,figure,footer,header,hgroup,nav,section{display:block}
+body{line-height:1.5;background:#fff}
+table{border-collapse:separate;border-spacing:0}
+caption,th,td{text-align:left;font-weight:normal;float:none}
+table,th,td{vertical-align:middle}
+blockquote:before,blockquote:after,q:before,q:after{content:""}
+blockquote,q{quotes:"" ""}
+a img{border:none}
+:focus{outline:0}
+body{background:#91a2c0;font:14px "Helvetica Neue",Arial,Helvetica,sans-serif}
+ul{list-style-type:none}
+a,a:visited{color:#369;font-weight:bold;text-decoration:none}
+a:hover{color:#369;font-weight:bold}
+body{font-size:14px;color:#666;background:#fff;font-family:"KievitPro","ff-kievit-web-pro-1","ff-kievit-web-pro-2","Helvetica Neue",Arial,Helvetica,sans-serif}
+h1,h2,h3,h3,h4{font-weight:normal;color:#222;clear:left}
+h1{font-size:3em;line-height:1.4;margin-bottom:.5em}
+h2{font-size:2em;line-height:1;margin-bottom:.5em}
+p{margin:0 0 1.5em}
+a:focus,a:hover{color:#369;font-weight:bold;text-decoration:underline}
+a{color:#369;font-weight:bold;text-decoration:none}
+ul,ol{margin:0 1.5em 1.5em 0;list-style-type:none}
+#props{position:relative;top:36px;font-size:18px;padding-left:373px;color:#eee;font-style:italic}
+#page{height:100%;width:100%;padding:5px}
+#home-view{height:300px;width:600px;position:relative;margin:0 auto;text-align:center;top:20%}
+#upload-view{height:300px;width:600px;position:relative;margin:0 auto;text-align:center;top:20%}
+#upload-await{height:300px;width:600px;position:relative;margin:0 auto;text-align:center;top:20%;display:none}
+#worksheet-view{z-index:200;cursor:pointer;}
+#worksheet-view td{border:1px solid #000;vertical-align:top;color:#000;cursor:pointer}
+#worksheet-view table{border-collapse:collapse;font-family:helvetica,arial,sans-serif;font-size:11px;cursor:pointer}
+.grey{background-color:#808080}
+.blue{background-color:#09f}
+#excel-row{background-color:#ccc}
+#head-select{width:300px;height:30px;text-align:center;padding:10px;position:fixed;top:0;margin:0 auto;z-index:500;background-color:#09f;display:none}
+#data-select{width:300px;height:30px;text-align:center;padding:10px;position:absolute;z-index:500;background-color:#09f;display:none;top:0;margin:0 auto}
+select{width:100%}
+#spotlight{position:fixed;background: #eeeeee; /* Old browsers */
+background: -moz-radial-gradient(center, ellipse cover,  #eeeeee 0%, #eeeeee 33%, #999999 62%, #111111 100%); /* FF3.6+ */
+background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#eeeeee), color-stop(33%,#eeeeee), color-stop(62%,#999999), color-stop(100%,#111111)); /* Chrome,Safari4+ */
+background: -webkit-radial-gradient(center, ellipse cover,  #eeeeee 0%,#eeeeee 33%,#999999 62%,#111111 100%); /* Chrome10+,Safari5.1+ */
+background: -o-radial-gradient(center, ellipse cover,  #eeeeee 0%,#eeeeee 33%,#999999 62%,#111111 100%); /* Opera 12+ */
+background: -ms-radial-gradient(center, ellipse cover,  #eeeeee 0%,#eeeeee 33%,#999999 62%,#111111 100%); /* IE10+ */
+background: radial-gradient(center, ellipse cover,  #eeeeee 0%,#eeeeee 33%,#999999 62%,#111111 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#111111',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */top:0;left:0;height:100%;width:100%;opacity:.65;-ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=65)filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=65);z-index:1000;display:none}
+#hxlresult{position:fixed;height:440px;width:605px;z-index:1500;top:40px;left:20%;background:#fff;-moz-box-shadow:0 0 10px #333;-webkit-box-shadow:0 0 10px #333;box-shadow:0 0 10px #333;padding:20px;display:none;-moz-border-radius:10px;-webkit-border-radius:10px;border-radius:10px;}
+#hxlresult textarea{width:600px;height:400px;font-size:16px}

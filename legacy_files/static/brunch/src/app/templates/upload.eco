@@ -1,0 +1,14 @@
+<div id="upload-view">
+  <h1>Upload File</h1>
+  <p>Please select the file to convert.</p>
+  <p>Remember that the files should have .xls or .xlsx extension.</p>
+  <form id="upload-form" action="/process_input/" method="post" enctype="multipart/form-data" target="theframe">
+    <input type="file" name="file"><br/><br/>
+    <input type="image" id="uploadme" src="/static/img/hxlate.png" value="Upload">
+  </form>
+  <iframe name="theframe" id="theframe" width="1px" height="1px"></iframe>
+</div>
+<div id="upload-await">
+  <h1>Patience Please</h1>
+  <p>Please wait while we process your file</p>
+</div>

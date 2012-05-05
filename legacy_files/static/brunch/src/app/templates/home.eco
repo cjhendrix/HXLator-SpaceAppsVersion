@@ -1,0 +1,8 @@
+<div id="home-view">
+  <h1>HXLator</h1>
+  <p>HXLator is a tool to convert raw humanitarian data from excel formats into the <br/>Humanitarian
+eXchange Language(HXL), a universal format of humanitarian activity data.</p>
+<p>The HXL is based on Resource Description Framework (RDF) and Linked Data concept</p>
+<p>this project is created using <a href="http://flask.pocoo.org">Flask</a> and <a href="http://brunch.io">Brunch.io</a></p>
+<a href="#upload"><img src="/static/img/start.png" alt="start HXL"/></a>
+</div>

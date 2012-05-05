@@ -1,0 +1,33 @@
+<div id="worksheet-view">
+  <p>Please select the data in this worksheet. Firstly, please select the corresponding headers from the dropdown available and then highlight all data (grey color)</p>
+  <table>
+    <select id="rdf-type" class='head-name' name="rdf-type"><option></option></select>
+    <% if @rows: %>
+    <th></th>
+    <% for cell, index in @rows[0]: %>
+    <th>
+      <select id="h-<%= index %>" class='child-name' name="h-<%= index %>">
+        <option value="ignore">--ignore this column</option>
+      </select>
+    </th>
+    <% end %>
+    <% for row in @rows: %>
+    <tr>
+      <td id="excel-row"><%= @rows.indexOf(row) + 1 %></td>
+      <% for cell,index in row: %>
+      <td class='cell' id="<%= @rows.indexOf(row) + 1 %>-<%= index + 1 %>"  data-value="<%= cell %>"><%= cell %></td>
+      <% end %>
+    </tr>
+    <% end %>
+  </table>
+</div>
+<div id="spotlight">
+</div>
+<div id="hxlresult">
+    <form id="submitform" action ="/handle_hxl/" method="POST"  target="updateFrame" >
+      <textarea id="hxlcode" name="hxlcode" disabled=disabled></textarea><br/>
+      <input type="image" id="submitme" src="/static/img/submit.png" value="Submit HXL File"/>
+    </form>
+    <iframe name="updateFrame" id="updateFrame" width="1px" height="1px"></iframe>
+</div>
+
