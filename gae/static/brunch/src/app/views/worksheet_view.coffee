@@ -15,7 +15,7 @@ class exports.WorksheetView extends Backbone.View
 
   events:
     'click td.cell' : 'selectCell'
-    'change #rdf-type' : 'fill_dropdown_child'
+    'change #rdf-type' : 'get_sparql_child'
     'click #submitme' : 'submit_hxl'
 
   render: (data) =>
@@ -29,7 +29,7 @@ class exports.WorksheetView extends Backbone.View
           data:{filename:@filepath}
           success:(data)=>
             $(@el).html worksheetTemplate(data)
-            @fill_dropdown_head()
+            @get_sparql_head()
             return @
           error: =>
             setTimeout ajaxCall, 5000
@@ -124,34 +124,85 @@ class exports.WorksheetView extends Backbone.View
     $('#hxlresult').css('left',hxlspacing).css('top',hxltop)
     $('#spotlight').fadeIn('fast')
     $('#hxlresult').fadeIn('fast')
-    #console.log @converted_hxl
 
-  fill_dropdown_head:=>
-    hxl_type = app.hxl.hxltypes
-    hxl_labels = app.hxl.hxllabels
-    for key,value of hxl_type
-      display_label = hxl_labels[key]
-      display_value = key
-      $('#rdf-type').append($("<option></option>").attr("value",display_value).text(display_label))
-
-  fill_dropdown_child:=>
-    parentnode = $('#rdf-type').val()
-    hxl_labels = app.hxl.hxllabels
-    hxl_attribute = app.hxl.hxltypes[parentnode].attributes
-    $('th > select.child-name > option').remove()
-    $('.child-name').append($('<option></option>').attr("value","ignore").text("--ignore this column"))
-    for value in hxl_attribute
-      display_label = hxl_labels[value]
-      display_value = value
-      $('.child-name').append($("<option></option>").attr("value",display_value).text(display_label))
-  
   submit_hxl:(event) =>
     event.preventDefault()
     dosubmit = confirm 'do you wish to submit the HXL data to the data repository?'
     if dosubmit
       $('#submitform').submit()
       alert 'Your HXL data has been submitted. Thank your for contributing'
-      location.hash = 'home'#  isoDateString:(d)=>
+      location.hash = 'home'
+      
+
+  get_sparql_head:=>
+    prefixes = 'PREFIX owl: <http://www.w3.org/2002/07/owl#> \nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \nPREFIX foaf: <http://xmlns.com/foaf/0.1/> \nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \nPREFIX skos: <http://www.w3.org/2004/02/skos/core#> \nPREFIX hxl: <http://hxl.humanitarianresponse.info/#> \n'
+    endpointURL = 'http://83.169.33.54:8080/parliament/sparql'
+    queryUrl = 'http://jsonp.lodum.de/?endpoint=' + endpointURL
+    sparqlQuery = prefixes + 'SELECT * WHERE { { Graph <http://hxl.carsten.io/graph/hxlvocab> { ?hxlclass a rdfs:Class ; skos:prefLabel ?hxllabel; rdfs:comment ?desc . } } UNION { Graph <http://hxl.carsten.io/graph/hxlvocab> { ?hxlclass a rdfs:Class ; skos:altLabel ?hxllabel . } } } ORDER BY ?hxlclass'
+    $.ajax(
+      url: queryUrl
+      data: {query:sparqlQuery}
+      dataType: "jsonp"
+      success:(data)=>
+        @hxl_classes = []
+        @bindings = data.results.bindings
+        for item in @bindings
+          hxlclass = item.hxlclass.value
+          hxllabel = item.hxllabel.value
+          $('#rdf-type').append($("<option></option>").attr("value",hxlclass).text(hxllabel))
+          #@hxl_classes.push({label:hxllabel,value:hxlclass})
+    )
+
+  get_sparql_child:=>
+    hxlClass = $('#rdf-type').val()
+    prefixes = 'PREFIX owl: <http://www.w3.org/2002/07/owl#> \nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \nPREFIX foaf: <http://xmlns.com/foaf/0.1/> \nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \nPREFIX skos: <http://www.w3.org/2004/02/skos/core#> \nPREFIX hxl: <http://hxl.humanitarianresponse.info/#> \n'
+    endpointURL = 'http://83.169.33.54:8080/parliament/sparql'
+    queryUrl = 'http://jsonp.lodum.de/?endpoint=' + endpointURL
+    sparqlQuery = prefixes + "SELECT ?res ?pr ?pred ?obj WHERE { GRAPH ?g { ?res rdf:type/rdfs:subClassOf* <" + hxlClass + "> ; ?pr ?obj .  } 	GRAPH <http://hxl.carsten.io/graph/hxlvocab> { OPTIONAL { ?pr skos:prefLabel ?pred . } } } ORDER BY ?res"
+    $('th > select.child-name > option').remove()
+    $('.child-name').append($('<option></option>').attr("value","ignore").text("--ignore this column"))
+    $.ajax(
+      url: queryUrl
+      data: {query:sparqlQuery}
+      dataType: "jsonp"
+      success:(data)=>
+        @existingResources = []
+        @binds = data.results.bindings
+        console.log @binds
+        if @binds.length > 0
+          lastResource = ''
+          dataAbout = ''
+          for bind in @binds
+            if lastResource != bind.res.value
+              lastResource = bind.res.value
+              tempLab = []
+              tempLab = lastResource.split('/')
+              finindex = tempLab.length - 1
+              showLabel = tempLab[finindex]
+              $('.child-name').append($("<option></option>").attr("value",lastResource).text(showLabel))
+              #@existingResources.push({label:showLabel,value:lastResource})
+              dataAbout = ''
+    )
+
+  #fill_dropdown_head:=>
+    #hxl_type = app.hxl.hxltypes
+    #hxl_labels = app.hxl.hxllabels
+    #for key,value of hxl_type
+      #display_label = hxl_labels[key]
+      #display_value = key
+      #$('#rdf-type').append($("<option></option>").attr("value",display_value).text(display_label))
+
+  #fill_dropdown_child:=>
+    #parentnode = $('#rdf-type').val()
+    #hxl_labels = app.hxl.hxllabels
+    #hxl_attribute = app.hxl.hxltypes[parentnode].attributes
+    #$('th > select.child-name > option').remove()
+    #$('.child-name').append($('<option></option>').attr("value","ignore").text("--ignore this column"))
+    #for value in hxl_attribute
+      #display_label = hxl_labels[value]
+      #display_value = value
+      #$('.child-name').append($("<option></option>").attr("value",display_value).text(display_label))
+#  isoDateString:(d)=>
 #    pad (n) =>
 #      if n < 10 
 #        return '0'+n

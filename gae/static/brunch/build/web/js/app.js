@@ -11396,9 +11396,9 @@ window.jQuery = window.$ = jQuery;
   exports.WorksheetView = (function() {
     __extends(WorksheetView, Backbone.View);
     function WorksheetView() {
+      this.get_sparql_child = __bind(this.get_sparql_child, this);
+      this.get_sparql_head = __bind(this.get_sparql_head, this);
       this.submit_hxl = __bind(this.submit_hxl, this);
-      this.fill_dropdown_child = __bind(this.fill_dropdown_child, this);
-      this.fill_dropdown_head = __bind(this.fill_dropdown_head, this);
       this.process_data = __bind(this.process_data, this);
       this.generate_total_data = __bind(this.generate_total_data, this);
       this.create_data_json = __bind(this.create_data_json, this);
@@ -11419,7 +11419,7 @@ window.jQuery = window.$ = jQuery;
     WorksheetView.prototype.total_data = {};
     WorksheetView.prototype.events = {
       'click td.cell': 'selectCell',
-      'change #rdf-type': 'fill_dropdown_child',
+      'change #rdf-type': 'get_sparql_child',
       'click #submitme': 'submit_hxl'
     };
     WorksheetView.prototype.render = function(data) {
@@ -11436,7 +11436,7 @@ window.jQuery = window.$ = jQuery;
             },
             success: __bind(function(data) {
               $(this.el).html(worksheetTemplate(data));
-              this.fill_dropdown_head();
+              this.get_sparql_head();
               return this;
             }, this),
             error: __bind(function() {
@@ -11557,35 +11557,6 @@ window.jQuery = window.$ = jQuery;
       $('#spotlight').fadeIn('fast');
       return $('#hxlresult').fadeIn('fast');
     };
-    WorksheetView.prototype.fill_dropdown_head = function() {
-      var display_label, display_value, hxl_labels, hxl_type, key, value, _results;
-      hxl_type = app.hxl.hxltypes;
-      hxl_labels = app.hxl.hxllabels;
-      _results = [];
-      for (key in hxl_type) {
-        value = hxl_type[key];
-        display_label = hxl_labels[key];
-        display_value = key;
-        _results.push($('#rdf-type').append($("<option></option>").attr("value", display_value).text(display_label)));
-      }
-      return _results;
-    };
-    WorksheetView.prototype.fill_dropdown_child = function() {
-      var display_label, display_value, hxl_attribute, hxl_labels, parentnode, value, _i, _len, _results;
-      parentnode = $('#rdf-type').val();
-      hxl_labels = app.hxl.hxllabels;
-      hxl_attribute = app.hxl.hxltypes[parentnode].attributes;
-      $('th > select.child-name > option').remove();
-      $('.child-name').append($('<option></option>').attr("value", "ignore").text("--ignore this column"));
-      _results = [];
-      for (_i = 0, _len = hxl_attribute.length; _i < _len; _i++) {
-        value = hxl_attribute[_i];
-        display_label = hxl_labels[value];
-        display_value = value;
-        _results.push($('.child-name').append($("<option></option>").attr("value", display_value).text(display_label)));
-      }
-      return _results;
-    };
     WorksheetView.prototype.submit_hxl = function(event) {
       var dosubmit;
       event.preventDefault();
@@ -11595,6 +11566,68 @@ window.jQuery = window.$ = jQuery;
         alert('Your HXL data has been submitted. Thank your for contributing');
         return location.hash = 'home';
       }
+    };
+    WorksheetView.prototype.get_sparql_head = function() {
+      var endpointURL, prefixes, queryUrl, sparqlQuery;
+      prefixes = 'PREFIX owl: <http://www.w3.org/2002/07/owl#> \nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \nPREFIX foaf: <http://xmlns.com/foaf/0.1/> \nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \nPREFIX skos: <http://www.w3.org/2004/02/skos/core#> \nPREFIX hxl: <http://hxl.humanitarianresponse.info/#> \n';
+      endpointURL = 'http://83.169.33.54:8080/parliament/sparql';
+      queryUrl = 'http://jsonp.lodum.de/?endpoint=' + endpointURL;
+      sparqlQuery = prefixes + 'SELECT * WHERE { { Graph <http://hxl.carsten.io/graph/hxlvocab> { ?hxlclass a rdfs:Class ; skos:prefLabel ?hxllabel; rdfs:comment ?desc . } } UNION { Graph <http://hxl.carsten.io/graph/hxlvocab> { ?hxlclass a rdfs:Class ; skos:altLabel ?hxllabel . } } } ORDER BY ?hxlclass';
+      return $.ajax({
+        url: queryUrl,
+        data: {
+          query: sparqlQuery
+        },
+        dataType: "jsonp",
+        success: __bind(function(data) {
+          var hxlclass, hxllabel, item, _i, _len, _ref, _results;
+          this.hxl_classes = [];
+          this.bindings = data.results.bindings;
+          _ref = this.bindings;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            item = _ref[_i];
+            hxlclass = item.hxlclass.value;
+            hxllabel = item.hxllabel.value;
+            _results.push($('#rdf-type').append($("<option></option>").attr("value", hxlclass).text(hxllabel)));
+          }
+          return _results;
+        }, this)
+      });
+    };
+    WorksheetView.prototype.get_sparql_child = function() {
+      var endpointURL, hxlClass, prefixes, queryUrl, sparqlQuery;
+      hxlClass = $('#rdf-type').val();
+      prefixes = 'PREFIX owl: <http://www.w3.org/2002/07/owl#> \nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \nPREFIX foaf: <http://xmlns.com/foaf/0.1/> \nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \nPREFIX skos: <http://www.w3.org/2004/02/skos/core#> \nPREFIX hxl: <http://hxl.humanitarianresponse.info/#> \n';
+      endpointURL = 'http://83.169.33.54:8080/parliament/sparql';
+      queryUrl = 'http://jsonp.lodum.de/?endpoint=' + endpointURL;
+      sparqlQuery = prefixes + "SELECT ?res ?pr ?pred ?obj WHERE { GRAPH ?g { ?res rdf:type/rdfs:subClassOf* <" + hxlClass + "> ; ?pr ?obj .  } 	GRAPH <http://hxl.carsten.io/graph/hxlvocab> { OPTIONAL { ?pr skos:prefLabel ?pred . } } } ORDER BY ?res";
+      $('th > select.child-name > option').remove();
+      $('.child-name').append($('<option></option>').attr("value", "ignore").text("--ignore this column"));
+      return $.ajax({
+        url: queryUrl,
+        data: {
+          query: sparqlQuery
+        },
+        dataType: "jsonp",
+        success: __bind(function(data) {
+          var bind, dataAbout, finindex, lastResource, showLabel, tempLab, _i, _len, _ref, _results;
+          this.existingResources = [];
+          this.binds = data.results.bindings;
+          console.log(this.binds);
+          if (this.binds.length > 0) {
+            lastResource = '';
+            dataAbout = '';
+            _ref = this.binds;
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              bind = _ref[_i];
+              _results.push(lastResource !== bind.res.value ? (lastResource = bind.res.value, tempLab = [], tempLab = lastResource.split('/'), finindex = tempLab.length - 1, showLabel = tempLab[finindex], $('.child-name').append($("<option></option>").attr("value", lastResource).text(showLabel)), dataAbout = '') : void 0);
+            }
+            return _results;
+          }
+        }, this)
+      });
     };
     return WorksheetView;
   })();
